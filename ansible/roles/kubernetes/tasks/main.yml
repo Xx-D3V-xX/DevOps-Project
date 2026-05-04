@@ -1,0 +1,101 @@
+---
+# Step 1 — Disable swap
+- name: Disable swap immediately
+  become: yes
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Comment out swap entries in /etc/fstab
+  become: yes
+  lineinfile:
+    path: /etc/fstab
+    regexp: '^(/\S+\s+\S+\s+swap\s+.*)$'
+    line: '# \1'
+    backrefs: yes
+
+# Step 2 — Kernel modules
+- name: Persist kernel modules for Kubernetes
+  become: yes
+  copy:
+    content: |
+      overlay
+      br_netfilter
+    dest: /etc/modules-load.d/k8s.conf
+    mode: '0644'
+
+- name: Load overlay module
+  become: yes
+  modprobe:
+    name: overlay
+
+- name: Load br_netfilter module
+  become: yes
+  modprobe:
+    name: br_netfilter
+
+# Step 3 — sysctl params
+- name: Set sysctl params for Kubernetes
+  become: yes
+  copy:
+    content: |
+      net.bridge.bridge-nf-call-iptables = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.ipv4.ip_forward = 1
+    dest: /etc/sysctl.d/k8s.conf
+    mode: '0644'
+
+- name: Apply sysctl params
+  become: yes
+  command: sysctl --system
+  changed_when: false
+
+# Step 4 — Kubernetes APT repository
+- name: Ensure /etc/apt/keyrings directory exists
+  become: yes
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Add Kubernetes GPG key
+  become: yes
+  shell: |
+    curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  args:
+    creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+- name: Add Kubernetes APT repository
+  become: yes
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /"
+    state: present
+    filename: kubernetes
+
+# Step 5 — Install kubelet, kubeadm, kubectl and hold versions
+- name: Install Kubernetes packages
+  become: yes
+  apt:
+    name:
+      - kubelet=1.28.*
+      - kubeadm=1.28.*
+      - kubectl=1.28.*
+    state: present
+    update_cache: yes
+
+- name: Hold Kubernetes packages at current version
+  become: yes
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+
+# Step 6 — Enable kubelet service
+- name: Enable and start kubelet
+  become: yes
+  service:
+    name: kubelet
+    state: started
+    enabled: yes

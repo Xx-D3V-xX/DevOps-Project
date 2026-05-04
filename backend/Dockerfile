@@ -10,5 +10,6 @@ COPY src/ ./src/
 COPY prisma/ ./prisma/
 COPY entrypoint.sh ./entrypoint.sh
 RUN chmod +x entrypoint.sh && ./node_modules/.bin/prisma generate
+ENV NODE_ENV=production
 EXPOSE 4000
 ENTRYPOINT ["./entrypoint.sh"]

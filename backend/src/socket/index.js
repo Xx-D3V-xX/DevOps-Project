@@ -1,11 +1,9 @@
 const { Server } = require('socket.io');
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
+const prisma = require('../db');
 
 const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
 
-// roomCode -> { users: Map<socketId, { username, color }> }
+// roomCode -> { users: Map<socketId, { username, color }>, lastContent: string }
 const rooms = new Map();
 
 // roomCode -> timestamp of last DB write
@@ -16,7 +14,7 @@ const socketSessions = new Map();
 
 function getOrCreateRoom(roomCode) {
   if (!rooms.has(roomCode)) {
-    rooms.set(roomCode, { users: new Map() });
+    rooms.set(roomCode, { users: new Map(), lastContent: '' });
   }
   return rooms.get(roomCode);
 }
@@ -77,6 +75,9 @@ function setupSocket(httpServer) {
       try {
         socket.to(roomCode).emit('code_update', { content });
 
+        const roomState = rooms.get(roomCode);
+        if (roomState) roomState.lastContent = content;
+
         const now = Date.now();
         const lastWrite = lastWriteTimes.get(roomCode) ?? 0;
         if (now - lastWrite > 5000) {
@@ -132,8 +133,14 @@ function setupSocket(httpServer) {
           room.users.delete(socket.id);
 
           if (room.users.size === 0) {
+            // flush final content before evicting from memory
+            const content = room.lastContent;
             rooms.delete(roomCode);
             lastWriteTimes.delete(roomCode);
+            await prisma.room.update({
+              where: { code: roomCode },
+              data: { content },
+            });
           }
 
           if (user) {

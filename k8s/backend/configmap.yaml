@@ -6,4 +6,4 @@ metadata:
 data:
   PORT: "4000"
   NODE_ENV: "production"
-  CORS_ORIGIN: "http://NODE_PUBLIC_IP:30001"  # replace NODE_PUBLIC_IP with the EC2 worker public IP
+  CORS_ORIGIN: "http://REPLACE_WITH_WORKER1_IP:30001"  # replace before kubectl apply

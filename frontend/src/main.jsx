@@ -4,7 +4,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import UsernameEntry from './pages/UsernameEntry';
 import RoomEntry from './pages/RoomEntry';
 import EditorPage from './pages/EditorPage';
-import './index.css';
 
 function RequireUsername({ children }) {
   return localStorage.getItem('codesync_username') ? children : <Navigate to="/" replace />;

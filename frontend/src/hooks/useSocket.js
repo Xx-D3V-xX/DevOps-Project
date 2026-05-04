@@ -3,6 +3,7 @@ import { io } from 'socket.io-client';
 
 export function useSocket(roomCode, username) {
   const socketRef = useRef(null);
+  const [connected, setConnected] = useState(false);
   const [users, setUsers] = useState([]);
   const [remoteContent, setRemoteContent] = useState(null);
   const [remoteCursors, setRemoteCursors] = useState({});
@@ -13,6 +14,9 @@ export function useSocket(roomCode, username) {
 
     const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:4000');
     socketRef.current = socket;
+
+    socket.on('connect', () => setConnected(true));
+    socket.on('disconnect', () => setConnected(false));
 
     socket.emit('join_room', { roomCode, username });
 
@@ -49,6 +53,7 @@ export function useSocket(roomCode, username) {
 
   return {
     socket: socketRef.current,
+    connected,
     users,
     remoteContent,
     remoteCursors,

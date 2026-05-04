@@ -6,7 +6,9 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: gp2
+  # For bare kubeadm: run `kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml`
+  # then change storageClassName to `local-path`, OR install AWS EBS CSI driver for gp2
+  storageClassName: standard
   resources:
     requests:
       storage: 5Gi

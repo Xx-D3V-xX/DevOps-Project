@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { useSocket } from '../hooks/useSocket';
-import { getRoom } from '../api';
-import api from '../api';
 
 const LANGUAGE_OPTIONS = [
   { label: 'Python', value: 'python' },
@@ -22,7 +20,7 @@ export default function EditorPage() {
 
   const suppressRemoteRef = useRef(false);
 
-  const { socket, users, remoteContent, roomLanguage } = useSocket(
+  const { socket, connected, users, remoteContent, roomLanguage } = useSocket(
     username ? roomCode : null,
     username
   );
@@ -45,18 +43,14 @@ export default function EditorPage() {
   function handleEditorChange(value) {
     if (suppressRemoteRef.current) return;
     setLocalContent(value ?? '');
+    if (!connected) return;
     socket?.emit('code_change', { roomCode, content: value ?? '' });
   }
 
-  async function handleLanguageChange(e) {
+  function handleLanguageChange(e) {
     const lang = e.target.value;
     setLanguage(lang);
     socket?.emit('language_change', { roomCode, language: lang });
-    try {
-      await api.patch(`/api/rooms/${roomCode}`, { language: lang });
-    } catch {
-      // non-critical
-    }
   }
 
   function handleCopy() {
@@ -103,7 +97,7 @@ export default function EditorPage() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {users.map(u => (
-              <div key={u.username} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div key={u.socketId || u.username} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: u.color, flexShrink: 0 }} />
                 <span style={{ fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {u.username}{u.username === username ? ' (you)' : ''}
@@ -118,7 +112,7 @@ export default function EditorPage() {
       <div style={{ flex: 1, overflow: 'hidden' }}>
         <Editor
           height="100%"
-          language={language === 'c' ? 'c' : language}
+          language={language}
           value={localContent}
           onChange={handleEditorChange}
           theme="vs-dark"

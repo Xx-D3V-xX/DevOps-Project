@@ -22,7 +22,18 @@ variable "subnet_cidr" {
   default     = "10.0.1.0/24"
 }
 
+variable "availability_zone" {
+  description = "Availability zone for the public subnet (must match EC2 and EBS volumes)"
+  type        = string
+  default     = "ap-south-1a"
+}
+
 variable "key_name" {
   description = "Name of the AWS key pair to use for EC2 instances"
   type        = string
+
+  validation {
+    condition     = length(var.key_name) > 0
+    error_message = "key_name must not be empty — provide the name of an existing EC2 key pair."
+  }
 }

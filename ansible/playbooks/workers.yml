@@ -1,0 +1,15 @@
+# CodeSync workers join — run AFTER master.yml
+- name: Join worker nodes to the Kubernetes cluster
+  hosts: workers
+  become: yes
+  tasks:
+    - name: Copy join command from controller to worker
+      copy:
+        src: /tmp/join-command.sh
+        dest: /tmp/join-command.sh
+        mode: "0755"
+
+    - name: Run kubeadm join command
+      command: bash /tmp/join-command.sh
+      args:
+        creates: /etc/kubernetes/kubelet.conf

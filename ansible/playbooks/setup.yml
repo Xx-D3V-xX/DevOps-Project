@@ -1,0 +1,10 @@
+# CodeSync node setup playbook — run this FIRST on all nodes.
+# Order: setup.yml → master.yml → workers.yml
+# Installs Docker, kubeadm, kubelet, kubectl on every node.
+- name: Configure all CodeSync nodes
+  hosts: all
+  become: yes
+  roles:
+    - common
+    - docker
+    - kubernetes

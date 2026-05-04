@@ -19,3 +19,13 @@ output "worker2_public_ip" {
   description = "Public IP of Kubernetes worker node 2"
   value       = aws_instance.worker2.public_ip
 }
+
+output "ecr_frontend_url" {
+  description = "ECR repository URL for the codesync-frontend image"
+  value       = aws_ecr_repository.frontend.repository_url
+}
+
+output "ecr_backend_url" {
+  description = "ECR repository URL for the codesync-backend image"
+  value       = aws_ecr_repository.backend.repository_url
+}

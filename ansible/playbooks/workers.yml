@@ -1,7 +1,7 @@
 # CodeSync workers join — run AFTER master.yml
 - name: Join worker nodes to the Kubernetes cluster
   hosts: workers
-  become: yes
+  become: true
   tasks:
     - name: Copy join command from controller to worker
       copy:

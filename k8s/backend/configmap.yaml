@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: codesync
+data:
+  PORT: "4000"
+  NODE_ENV: "production"
+  CORS_ORIGIN: "http://NODE_PUBLIC_IP:30001"  # replace NODE_PUBLIC_IP with the EC2 worker public IP

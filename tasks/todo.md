@@ -301,7 +301,7 @@ Prompt for Claude Code:
 Initialize the CodeSync backend at backend/.
 
 1. Run: npm init -y, then install:
-   - dependencies: express, socket.io, @prisma/client, pg, cors, dotenv, express-validator
+   - dependencies: express, socket.io, @prisma/client, pg, cors, dotenv
    - devDependencies: prisma, nodemon
 
 2. Create backend/prisma/schema.prisma:
@@ -381,9 +381,6 @@ Create the Express server and room API routes for the CodeSync backend.
    - Return { data: { code, language, content, updatedAt } }
 
    All routes use async/await. Wrap in try/catch — on error return 500 { error: err.message }.
-
-3. Create backend/src/db.js:
-   - Import PrismaClient, export a singleton instance
 ```
 Exit condition: `npm run dev` starts without errors. `curl -X POST http://localhost:4000/api/rooms` returns a JSON object with a 6-char code. `curl http://localhost:4000/api/rooms/<code>` returns the room data.
 
@@ -779,33 +776,28 @@ Stages:
 
 1. "Checkout": checkout scm
 
-2. "Lint":
-   - sh 'cd frontend && npm ci && npx eslint src/ --max-warnings 0'
-   - sh 'cd backend && npm ci && npx eslint src/ --max-warnings 0'
-   (Add .eslintrc.cjs to both frontend and backend with basic rules)
-
-3. "Build Images":
+2. "Build Images":
    - sh "docker build -t ${FRONTEND_IMAGE} --build-arg VITE_API_URL=http://WORKER1_IP:30001 ./frontend"
    - sh "docker build -t ${BACKEND_IMAGE} ./backend"
 
-4. "Push to ECR":
+3. "Push to ECR":
    - sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_URL}"
    - sh "docker push ${FRONTEND_IMAGE}"
    - sh "docker push ${BACKEND_IMAGE}"
 
-5. "Deploy to Kubernetes":
+4. "Deploy to Kubernetes":
    - sh "kubectl set image deployment/frontend frontend=${FRONTEND_IMAGE} -n codesync"
    - sh "kubectl set image deployment/backend backend=${BACKEND_IMAGE} -n codesync"
 
-6. "Verify Rollout":
+5. "Verify Rollout":
    - sh "kubectl rollout status deployment/frontend -n codesync --timeout=120s"
    - sh "kubectl rollout status deployment/backend -n codesync --timeout=120s"
 
 post { failure { echo 'Pipeline failed — check logs above' } }
 
-Also create basic .eslintrc.cjs for both frontend and backend (eslint:recommended config, node env for backend, browser env for frontend).
+No lint stage. No test stage. Build → push → deploy only.
 ```
-Exit condition: Jenkinsfile exists at repo root. Pipeline can be parsed by Jenkins (verify via Jenkins "Pipeline Syntax" checker). On a manual run, all 6 stages complete green.
+Exit condition: Jenkinsfile exists at repo root. On a manual run, all 5 stages complete green.
 
 ---
 
@@ -843,7 +835,7 @@ Document the following steps:
    - Save and Build Now
 
 5. Verify:
-   - All 6 stages green
+   - All 5 stages green
    - kubectl get pods -n codesync shows new pods running new image tags
    - kubectl rollout history deployment/backend -n codesync shows revision 2
 

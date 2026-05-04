@@ -3,7 +3,7 @@
 # Installs Docker, kubeadm, kubelet, kubectl on every node.
 - name: Configure all CodeSync nodes
   hosts: all
-  become: yes
+  become: true
   roles:
     - common
     - docker

@@ -1,7 +1,7 @@
 # CodeSync master init — run AFTER setup.yml
 - name: Initialise Kubernetes control plane on master node
   hosts: master
-  become: yes
+  become: true
   tasks:
     - name: Run kubeadm init
       command: kubeadm init --pod-network-cidr=10.244.0.0/16
@@ -20,7 +20,7 @@
       copy:
         src: /etc/kubernetes/admin.conf
         dest: /home/ubuntu/.kube/config
-        remote_src: yes
+        remote_src: true
         owner: ubuntu
         group: ubuntu
         mode: "0600"
@@ -37,7 +37,7 @@
       copy:
         src: /etc/kubernetes/admin.conf
         dest: /root/.kube/config
-        remote_src: yes
+        remote_src: true
         owner: root
         group: root
         mode: "0600"
@@ -61,4 +61,4 @@
       fetch:
         src: /tmp/join-command.sh
         dest: /tmp/join-command.sh
-        flat: yes
+        flat: true

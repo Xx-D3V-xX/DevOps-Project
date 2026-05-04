@@ -1,6 +1,6 @@
 ---
 - name: Remove old Docker packages
-  become: yes
+  become: true
   apt:
     name:
       - docker
@@ -11,7 +11,7 @@
     state: absent
 
 - name: Add Docker GPG key
-  become: yes
+  become: true
   shell: |
     install -m 0755 -d /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -20,19 +20,19 @@
     creates: /etc/apt/keyrings/docker.gpg
 
 - name: Add Docker APT repository
-  become: yes
+  become: true
   apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu jammy stable"
     state: present
     filename: docker
 
 - name: Run apt-get update
-  become: yes
+  become: true
   apt:
-    update_cache: yes
+    update_cache: true
 
 - name: Install Docker packages
-  become: yes
+  become: true
   apt:
     name:
       - docker-ce
@@ -43,21 +43,21 @@
     state: present
 
 - name: Start and enable Docker service
-  become: yes
+  become: true
   service:
     name: docker
     state: started
-    enabled: yes
+    enabled: true
 
 - name: Add ubuntu user to docker group
-  become: yes
+  become: true
   user:
     name: ubuntu
     groups: docker
-    append: yes
+    append: true
 
 - name: Configure Docker daemon
-  become: yes
+  become: true
   copy:
     content: |
       {

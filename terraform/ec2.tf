@@ -13,6 +13,11 @@ data "aws_ami" "ubuntu" {
     name   = "virtualization-type"
     values = ["hvm"]
   }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
 }
 
 # ── Master Node ───────────────────────────────────────────────────────────────
@@ -26,8 +31,9 @@ resource "aws_instance" "master" {
   associate_public_ip_address = true
 
   root_block_device {
-    volume_size = 20
-    volume_type = "gp2"
+    volume_size           = 20
+    volume_type           = "gp2"
+    delete_on_termination = true
   }
 
   tags = merge(local.common_tags, {
@@ -47,8 +53,9 @@ resource "aws_instance" "worker1" {
   associate_public_ip_address = true
 
   root_block_device {
-    volume_size = 15
-    volume_type = "gp2"
+    volume_size           = 15
+    volume_type           = "gp2"
+    delete_on_termination = true
   }
 
   tags = merge(local.common_tags, {
@@ -68,8 +75,9 @@ resource "aws_instance" "worker2" {
   associate_public_ip_address = true
 
   root_block_device {
-    volume_size = 15
-    volume_type = "gp2"
+    volume_size           = 15
+    volume_type           = "gp2"
+    delete_on_termination = true
   }
 
   tags = merge(local.common_tags, {

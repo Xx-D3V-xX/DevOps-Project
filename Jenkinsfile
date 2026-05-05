@@ -27,7 +27,7 @@ pipeline {
 
         stage('Push to ECR') {
             steps {
-                sh "aws ecr get-login-password --region ${AWS_REGION} | /tmp/docker login --username AWS --password-stdin ${ECR_URL}"
+                sh "AWS_CONFIG_FILE=/tmp/.aws/config AWS_SHARED_CREDENTIALS_FILE=/tmp/.aws/credentials /tmp/bin/aws ecr get-login-password --region ${AWS_REGION} | /tmp/docker login --username AWS --password-stdin ${ECR_URL}"
                 sh "/tmp/docker push ${FRONTEND_IMAGE}"
                 sh "/tmp/docker push ${BACKEND_IMAGE}"
             }

@@ -1,9 +1,9 @@
-FROM node:18-alpine AS deps
+FROM node:18-bullseye-slim AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 
-FROM node:18-alpine AS prod
+FROM node:18-bullseye-slim AS prod
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY src/ ./src/

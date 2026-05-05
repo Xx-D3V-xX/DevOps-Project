@@ -35,15 +35,15 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh "kubectl set image deployment/frontend frontend=${FRONTEND_IMAGE} -n codesync"
-                sh "kubectl set image deployment/backend backend=${BACKEND_IMAGE} -n codesync"
+                sh "KUBECONFIG=/tmp/kubeconfig /tmp/kubectl set image deployment/frontend frontend=${FRONTEND_IMAGE} -n codesync"
+		sh "KUBECONFIG=/tmp/kubeconfig /tmp/kubectl set image deployment/backend backend=${BACKEND_IMAGE} -n codesync"
             }
         }
 
         stage('Verify Rollout') {
             steps {
-                sh "kubectl rollout status deployment/frontend -n codesync --timeout=120s"
-                sh "kubectl rollout status deployment/backend -n codesync --timeout=120s"
+                sh "KUBECONFIG=/tmp/kubeconfig /tmp/kubectl rollout status deployment/frontend -n codesync --timeout=120s"
+		sh "KUBECONFIG=/tmp/kubeconfig /tmp/kubectl rollout status deployment/backend -n codesync --timeout=120s"
             }
         }
     }

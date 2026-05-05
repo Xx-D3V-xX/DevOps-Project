@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ECR_FRONTEND_URL:latest  # replaced by Jenkins with ECR URL + git SHA
+          image: 452447752099.dkr.ecr.ap-south-1.amazonaws.com/codesync-frontend:latest  # replaced by Jenkins with ECR URL + git SHA
           ports:
             - containerPort: 80
           resources:

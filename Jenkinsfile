@@ -20,16 +20,16 @@ pipeline {
 
         stage('Build Images') {
             steps {
-                sh "docker build -t ${FRONTEND_IMAGE} --build-arg VITE_API_URL=http://${WORKER_IP}:30001 ./frontend"
-                sh "docker build -t ${BACKEND_IMAGE} ./backend"
+                sh "/tmp/docker build -t ${FRONTEND_IMAGE} --build-arg VITE_API_URL=http://${WORKER_IP}:30001 ./frontend"
+                sh "/tmp/docker build -t ${BACKEND_IMAGE} ./backend"
             }
         }
 
         stage('Push to ECR') {
             steps {
-                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_URL}"
-                sh "docker push ${FRONTEND_IMAGE}"
-                sh "docker push ${BACKEND_IMAGE}"
+                sh "aws ecr get-login-password --region ${AWS_REGION} | /tmp/docker login --username AWS --password-stdin ${ECR_URL}"
+                sh "/tmp/docker push ${FRONTEND_IMAGE}"
+                sh "/tmp/docker push ${BACKEND_IMAGE}"
             }
         }
 
